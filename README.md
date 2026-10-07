@@ -6,6 +6,7 @@
 * power
 * anything that can run linux
 * gcc
+* make
 * dialyn as wallpaper
 
 # Installation guide
@@ -16,23 +17,23 @@
    ```
 2. **Compile**
    ```bash
-   gcc code/main.c -o newSpice
+   make
    ```
-   **if you doesnt have c/c++ compiler, you should install it**
+   **if you doesnt have c/c++ compiler and make, you should install them**
    
    **Debian/Ubuntu/Mint:**
    ```bash
-   sudo apt update && sudo apt install gcc
+   sudo apt update && sudo apt install gcc make
    ```
 
    **Fedora/RHEL/CentOS:**
    ```bash
-   sudo dnf install gcc
+   sudo dnf install gcc make
    ```
 
    **Arch:**
    ```bash
-   sudo pacman -S gcc
+   sudo pacman -S gcc make
    ```
     
    
