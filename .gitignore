@@ -1,4 +1,7 @@
 a.out
+newSpice
+shell.nix
+code/newSpice
 code/a.out
 code/main
 *.o

@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ncurses.h>
 
-#define clear() printf("\033[H\033[J") // ctrl + l func
+// #define clear() printf("\033[H\033[J") // ctrl + l func (no longer used due ncurses)
 
 int main() {
     // bufera (.)(.)
@@ -94,25 +95,38 @@ int main() {
         previdle0 = idle_total0;
 
         // output block
+        initscr();
+        noecho();
+        //keypad(stdscr, TRUE); 
+        int height, widht, start_y, start_x;
+        height = 10;
+        widht = 90;
+        start_y = 1;
+        start_x = 5;
 
-        printf("CPU LOAD: %.1f%%\n", cpu_usage);
-        if(cputempfile != NULL) {
-            printf("TEMP: %.1f°C \n", temp_raw);
-        }
-        else printf("TEMP: n/a\n");
-
-        printf("MemTotal: %.1f MB\n", mem_total_kB / 1024.0f);
-        printf("MemAvailable: %.1f MB\n", mem_available_kB / 1024.0f);
-        printf("MemUsage: %.1f MB\n", mem_usage_kB / 1024.0f);
+        WINDOW * win = newwin(height, widht, start_y, start_x);
+        refresh();
         
-        if(swap_total_kB != 0) {
-            printf("SwapTotal: %.1f MB\n", swap_total_kB / 1024.0f);
-            printf("SwapFree: %.1f MB\n", swap_free_kB / 1024.0f);
-            printf("SwapUsage: %.1f MB\n", swap_usage_kB / 1024.0f);
-        } 
-        else printf("Swap: n/a");
+        box(win, 0, 0);
+        mvwprintw(win, 1, 1, "CPU LOAD: %.1f%%", cpu_usage);
+        if(cputempfile != NULL) {
+            mvwprintw(win, 2, 1, "TEMP: %.1f°C", temp_raw);
+        }
+        else mvwprintw(win, 2, 1, "TEMP: n/a");
 
+        mvwprintw(win, 3, 1, "MemTotal: %.1f MB", mem_total_kB / 1024.0f);
+        mvwprintw(win, 4, 1, "MemAvailable: %.1f MB", mem_available_kB / 1024.0f);
+        mvwprintw(win, 5, 1, "MemUsage: %.1f MB", mem_usage_kB / 1024.0f);
+
+        if(swap_total_kB != 0) {
+            mvwprintw(win, 6, 1, "SwapTotal: %.1f MB", swap_total_kB / 1024.0f);
+            mvwprintw(win, 7, 1, "SwapFree: %.1f MB", swap_free_kB / 1024.0f);
+            mvwprintw(win, 8, 1, "SwapUsage: %.1f MB", swap_usage_kB / 1024.0f);
+        } 
+        else mvwprintw(win, 6, 1, "Swap: n/a");
+        wrefresh(win);
         }
     }
+    endwin();
     return 0; 
 }
