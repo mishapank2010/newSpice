@@ -1,4 +1,4 @@
-# This is a simple Resource Monitor, what written in C for linux
+# This is a simple Resource Monitor(in future task manager), what written in C for linux
 
 <img width="679" height="678" alt="artem2" src="https://github.com/user-attachments/assets/78cab6ed-ad14-43fc-a8a3-133d6e855280" />
 
