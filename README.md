@@ -12,7 +12,7 @@
 # Installation guide
 1. **Clone repo**
    ```bash
-   git clone [https://github.com/mishapank2010/newSpice.git](https://github.com/mishapank2010/newSpice.git)
+   git clone https://github.com/mishapank2010/newSpice.git
    cd newSpice
    ```
 2. **Compile**
