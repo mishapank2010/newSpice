@@ -32,28 +32,31 @@ int main(void) {
     unsigned long long mem_available_kB = 0;
     unsigned long long swap_total_kB = 0;
     unsigned long long swap_free_kB = 0; 
+    float cpu_usage = 0.0f;
     float temp_raw;
+    int mode = 0;
+    time_t last_sample = 0;
 
     // path to the temp file
     char cputemppath[256] = "";
     char hwpath[256];
     char hwname[32];
-    
+
     for(int i = 0; i < 10; i++) {
         snprintf(hwpath, sizeof(hwpath), "/sys/class/hwmon/hwmon%d/name", i);
         FILE *zalupus = fopen(hwpath, "r");
         if(zalupus == NULL) continue;
-    hwname[0] = '\0';
-    fgets(hwname, sizeof(hwname), zalupus);
-    fclose(zalupus);
-    if(strncmp(hwname, "coretemp", 8) == 0 ||
-            strncmp(hwname, "k10temp", 7) == 0 ||
-            strncmp(hwname, "cpu_thermal", 11) == 0) {
+        hwname[0] = '\0';
+        fgets(hwname, sizeof(hwname), zalupus);
+        fclose(zalupus);
+        if(strncmp(hwname, "coretemp", 8) == 0 ||
+                strncmp(hwname, "k10temp", 7) == 0 ||
+                strncmp(hwname, "cpu_thermal", 11) == 0) {
             snprintf(cputemppath, sizeof(cputemppath), "/sys/class/hwmon/hwmon%d/temp1_input", i);
             break;
-            }
+        }
     }
-    
+
     // ncurses start
     initscr();
     noecho();
@@ -101,29 +104,49 @@ int main(void) {
         } 
         prevtotal = total;
         previdle = idle;
-        
+
 
         // output block
         werase(win);
         box(win, 0, 0);
-        mvwprintw(win, 1, 1, "CPU LOAD: %.1f%%", cpu_usage);
+        mvwprintw(win, 1, 1, "%-15s %5.1f%%", "CPU LOAD:", cpu_usage);
         if(cputempfile != NULL) {
-            mvwprintw(win, 2, 1, "TEMP: %.1f°C", temp_raw);
+            mvwprintw(win, 2, 1, "%-15s %5.1f°C", "TEMP:", temp_raw);
         }
-        else mvwprintw(win, 2, 1, "TEMP: n/a");
+        else mvwprintw(win, 2, 1, "%-15s", "TEMP: n/a");
 
-        mvwprintw(win, 3, 1, "MemTotal: %.1f MB", mem_total_kB / 1024.0f);
-        mvwprintw(win, 4, 1, "MemAvailable: %.1f MB", mem_available_kB / 1024.0f);
-        mvwprintw(win, 5, 1, "MemUsage: %.1f MB", mem_usage_kB / 1024.0f);
+        const float kb_to_Gb = 1024.0f * 1024.0f;
 
-        if(swap_total_kB != 0) {
-            mvwprintw(win, 6, 1, "SwapTotal: %.1f MB", swap_total_kB / 1024.0f);
-            mvwprintw(win, 7, 1, "SwapFree: %.1f MB", swap_free_kB / 1024.0f);
-            mvwprintw(win, 8, 1, "SwapUsage: %.1f MB", swap_usage_kB / 1024.0f);
-        } 
-        else mvwprintw(win, 6, 1, "Swap: n/a");
+        if(mode == 0) {
+            mvwprintw(win, 3, 1, "%-15s %5.1f MB", "MemTotal:", mem_total_kB / 1024.0f);
+            mvwprintw(win, 4, 1, "%-15s %5.1f MB", "MemAvailable:", mem_available_kB / 1024.0f);
+            mvwprintw(win, 5, 1, "%-15s %5.1f MB", "MemUsage:", mem_usage_kB / 1024.0f);
+
+            if(swap_total_kB != 0) {
+                mvwprintw(win, 6, 1, "%-15s %5.1f MB", "SwapTotal:", swap_total_kB / 1024.0f);
+                mvwprintw(win, 7, 1, "%-15s %5.1f MB", "SwapFree:", swap_free_kB / 1024.0f);
+                mvwprintw(win, 8, 1, "%-15s %5.1f MB", "SwapUsage:", swap_usage_kB / 1024.0f);
+            } 
+            else mvwprintw(win, 6, 1, "%-15s", "Swap: n/a");
+        }
+        else { 
+            mvwprintw(win, 3, 1, "%-15s %5.1f GB", "MemTotal:", mem_total_kB / kb_to_Gb);
+            mvwprintw(win, 4, 1, "%-15s %5.1f GB", "MemAvailable:", mem_available_kB / kb_to_Gb);
+            mvwprintw(win, 5, 1, "%-15s %5.1f GB", "MemUsage:", mem_usage_kB / kb_to_Gb);
+
+            if(swap_total_kB != 0) {
+                mvwprintw(win, 6, 1, "%-15s %5.1f GB", "SwapTotal:", swap_total_kB / kb_to_Gb);
+                mvwprintw(win, 7, 1, "%-15s %5.1f GB", "SwapFree:", swap_free_kB / kb_to_Gb);
+                mvwprintw(win, 8, 1, "%-15s %5.1f GB", "SwapUsage:", swap_usage_kB / kb_to_Gb);
+            } 
+            else mvwprintw(win, 6, 1, "%-15s", "Swap: n/a");
+        }
+        mvprintw(11, 6, "q - exit || g - change output mode");
+        refresh();
         wrefresh(win);
-        if(wgetch(win) == 'q') break;
+        int input = wgetch(win);
+        if(input == 'g') mode = !mode;
+        else if(input == 'q') break;
     }
     delwin(win);
     endwin();
